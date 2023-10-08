@@ -19,9 +19,9 @@ fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_1.path);
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const sdk_1 = require("@deepgram/sdk");
+const models_1 = require("../models");
 const check_1 = require("./check");
-const apiKey = "c2513689b2c33bd9f937eb7c9a39669ea8d24c5c";
-// const apiKey = process.env.DEEPGRAM_API_KEY!
+const apiKey = process.env.DEEPGRAM_API_KEY;
 const transcribeAudio = (filename) => __awaiter(void 0, void 0, void 0, function* () {
     return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
         const deepgram = new sdk_1.Deepgram(apiKey);
@@ -40,20 +40,19 @@ const transcribeAudio = (filename) => __awaiter(void 0, void 0, void 0, function
             if (response && response.results) {
                 const upload_url = filename.split("temp")[1].slice(1).split(".")[0];
                 const transcript = JSON.stringify(response.results.channels[0].alternatives[0]);
-                return console.log(transcript);
-                // const video = await db.video.findOne({
-                //   where: {
-                //     upload_url,
-                //   },
-                // });
-                // if (!video) {
-                //   reject({ success: false });
-                // }
-                // if (video) {
-                //   video.transcript = transcript;
-                //   await video.save();
-                //   resolve({ success: true, filename, upload_url });
-                // }
+                const video = yield models_1.db.video.findOne({
+                    where: {
+                        upload_url,
+                    },
+                });
+                if (!video) {
+                    reject({ success: false });
+                }
+                if (video) {
+                    video.transcript = transcript;
+                    yield video.save();
+                    resolve({ success: true, filename, upload_url });
+                }
             }
         }
         catch (error) {
@@ -103,9 +102,3 @@ const transcribeVideo = (videoName) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.transcribeVideo = transcribeVideo;
-try {
-    transcribeAudio(path_1.default.join(__dirname, "../temp/", `test.wav`));
-}
-catch (error) {
-    console.error(error);
-}

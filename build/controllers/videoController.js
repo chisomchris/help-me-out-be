@@ -46,16 +46,23 @@ const uploadStreamData = (req, res) => __awaiter(void 0, void 0, void 0, functio
             });
         }
         if (req.body.isLastBlock) {
-            const { error } = joi_1.default.boolean().validate(req.body.isLastBlock);
+            const { error } = joi_1.default.string().validate(req.body.isLastBlock);
             if (error) {
                 return res.status(400).json({
                     success: false,
-                    message: "isLastBlock must be a boolean"
+                    message: "isLastBlock must be a string"
+                });
+            }
+            const isLastBlock = Number(req.body.isLastBlock);
+            if (!(isLastBlock == 0 || isLastBlock == 1)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid Data: isLastBlock must be either '0' or '1'"
                 });
             }
         }
         if (req.body.nextBlock) {
-            const { error } = joi_1.default.number().integer().greater(0).validate(req.body.nextBlock);
+            const { error } = joi_1.default.number().integer().greater(0).validate(Number(req.body.nextBlock));
             if (error) {
                 return res.status(400).json({
                     success: false,
@@ -85,13 +92,13 @@ const uploadStreamData = (req, res) => __awaiter(void 0, void 0, void 0, functio
                 message: "Stream Closed"
             });
         }
-        if (last_chunk + 1 !== nextBlock) {
+        if (last_chunk + 1 !== Number(nextBlock)) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid chunk"
             });
         }
-        if (isLastBlock) {
+        if (isLastBlock && Boolean(Number(isLastBlock))) {
             const success = yield (0, writeStream_1.writeStream)(upload_url, req.file.buffer);
             if (!success) {
                 return res.status(500).json({

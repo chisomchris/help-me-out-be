@@ -13,9 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.db = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config({ path: ".env" });
 const dbconfig_1 = require("../config/dbconfig");
 const sequelize_1 = require("sequelize");
 const video_model_1 = __importDefault(require("./video.model"));
+dbconfig_1.sequelize.sync({}).then(() => {
+    console.log("Database syncing done");
+});
 exports.db = {
     sequelize: dbconfig_1.sequelize,
     Sequelize: sequelize_1.Sequelize,
